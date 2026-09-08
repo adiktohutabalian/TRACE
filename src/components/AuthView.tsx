@@ -40,8 +40,12 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess }) => {
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-center items-center px-4 py-12">
       {/* Brand Header */}
       <div className="text-center mb-8 max-w-md">
-        <div className="w-12 h-12 rounded-2xl bg-zinc-900 text-white flex items-center justify-center mx-auto mb-4 shadow-md">
-          <BookmarkCheck className="w-6 h-6 text-emerald-400" />
+        <div className="flex items-center justify-center mx-auto mb-4">
+          <img
+            src="/logo/trace.png"
+            alt="TRACE Logo"
+            className="w-14 h-14 rounded-2xl object-contain shadow-md"
+          />
         </div>
         <h1 className="text-3xl font-extrabold text-zinc-900 tracking-wider">
           TRACE

@@ -16,11 +16,14 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout, onNavigateHome }
         {/* Brand */}
         <button
           onClick={onNavigateHome}
-          className="flex items-center gap-3 text-left group focus:outline-none"
-        >
-          <div className="w-9 h-9 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold tracking-wider shadow-sm group-hover:bg-zinc-800 transition-colors">
-            <BookmarkCheck className="w-5 h-5 text-emerald-400" />
-          </div>
+          className="flex items-center gap-3 text-left group focus:outline-none">
+            
+          {/* LOGO BARU */}
+          <img
+            src="/logo/trace.png"
+            alt="TRACE Logo"
+            className="w-9 h-9 rounded-xl object-contain shadow-xs group-hover:scale-105 transition-transform"
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-zinc-900 text-lg tracking-wider">
