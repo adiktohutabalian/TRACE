@@ -107,8 +107,9 @@ export const CheckpointModal: React.FC<CheckpointModalProps> = ({
         {/* Form Body - Scrollable on small screens */}
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {error && (
-            <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
-              {error}
+            <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-start gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+              <span>{error}</span>
             </div>
           )}
 
