@@ -11,6 +11,8 @@ import {
   Edit2,
   Clock,
   Sparkles,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 
 interface ActivityDetailViewProps {
@@ -83,14 +85,33 @@ export const ActivityDetailView: React.FC<ActivityDetailViewProps> = ({
 
   if (error || !activity) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-rose-600 mb-4">{error || "Activity not found"}</p>
-        <button
-          onClick={onBack}
-          className="px-4 py-2 text-xs font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-100"
-        >
-          Back to Dashboard
-        </button>
+      <div className="py-16 px-6 text-center bg-white rounded-2xl border border-rose-200/80 shadow-xs max-w-md mx-auto space-y-4 animate-in fade-in">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+          <AlertTriangle className="w-6 h-6" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-base font-semibold text-zinc-900">
+            Failed to load activity
+          </h3>
+          <p className="text-xs text-zinc-500 max-w-xs mx-auto">
+            {error || "We couldn't retrieve the context history for this activity."}
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={onBack}
+            className="px-4 py-2 text-xs font-medium text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200/70 rounded-xl transition-colors"
+          >
+            Back to Dashboard
+          </button>
+          <button
+            onClick={fetchDetails}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-all shadow-xs"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Try Again</span>
+          </button>
+        </div>
       </div>
     );
   }
