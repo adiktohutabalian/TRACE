@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Activity, Checkpoint } from "../types";
 import { api } from "../api";
+import { TimelineSkeleton } from "./SkeletonLoaders";
 import {
   ArrowLeft,
   Compass,
@@ -63,8 +64,19 @@ export const ActivityDetailView: React.FC<ActivityDetailViewProps> = ({
 
   if (loading) {
     return (
-      <div className="py-12 text-center text-sm text-zinc-500">
-        Loading context timeline...
+      <div className="space-y-6">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Dashboard</span>
+        </button>
+        <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-xs animate-pulse space-y-3">
+          <div className="h-6 w-48 bg-zinc-300 rounded-lg" />
+          <div className="h-4 w-72 bg-zinc-200 rounded-md" />
+        </div>
+        <TimelineSkeleton />
       </div>
     );
   }
