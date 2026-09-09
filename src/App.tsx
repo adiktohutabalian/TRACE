@@ -8,6 +8,10 @@ import { CheckpointModal } from "./components/CheckpointModal";
 import { NewActivityModal } from "./components/NewActivityModal";
 import { ActivityDetailView } from "./components/ActivityDetailView";
 import { AuthView } from "./components/AuthView";
+import { MobileBottomNav, MobileTab } from "./components/MobileBottomNav";
+import { ProfileModal } from "./components/ProfileModal";
+import { ActivitySelectModal } from "./components/ActivitySelectModal";
+import { DashboardSkeleton } from "./components/SkeletonLoaders";
 import { Plus, Compass, Layers, Sparkles } from "lucide-react";
 
 export default function App() {
@@ -19,6 +23,11 @@ export default function App() {
     "dashboard"
   );
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+
+  // Mobile Navigation Tab (Home vs Activities vs Profile)
+  const [mobileTab, setMobileTab] = useState<MobileTab>("home");
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isActivitySelectModalOpen, setIsActivitySelectModalOpen] = useState(false);
 
   // Data States
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
@@ -176,6 +185,45 @@ export default function App() {
       ? resumeData.activity
       : null);
 
+  // Quick Add handler from Mobile Bottom Nav (+)
+  const handleQuickAddCheckpoint = () => {
+    // If currently looking at an activity detail, drop checkpoint for that activity directly
+    if (currentView === "activity_detail" && selectedActivityId) {
+      handleOpenCheckpointModal(selectedActivityId);
+      return;
+    }
+
+    // If no activities exist yet, open new activity modal first
+    if (activities.length === 0) {
+      setIsNewActivityModalOpen(true);
+      return;
+    }
+
+    // If only 1 activity exists, open checkpoint modal directly for it
+    if (activities.length === 1) {
+      handleOpenCheckpointModal(activities[0].id);
+      return;
+    }
+
+    // If multiple activities exist, open the quick picker sheet
+    setIsActivitySelectModalOpen(true);
+  };
+
+  // Mobile Bottom Navigation Tab switcher
+  const handleTabChange = (tab: MobileTab) => {
+    if (tab === "profile") {
+      setIsProfileModalOpen(true);
+      return;
+    }
+
+    setMobileTab(tab);
+    // If navigating to home or activities from detail view, return to dashboard
+    if (currentView === "activity_detail") {
+      setCurrentView("dashboard");
+      setSelectedActivityId(null);
+    }
+  };
+
   // Dynamic greeting based on hour of day
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -185,7 +233,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white pb-20">
+    <div className="min-h-screen bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white pb-28 md:pb-16">
       {/* Top Navbar */}
       <Navbar
         user={currentUser}
@@ -193,35 +241,45 @@ export default function App() {
         onNavigateHome={() => {
           setCurrentView("dashboard");
           setSelectedActivityId(null);
+          setMobileTab("home");
         }}
       />
 
       {/* Main Content Area */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
-        {currentView === "dashboard" ? (
-          <div className="space-y-10">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+        {loadingData && activities.length === 0 ? (
+          <DashboardSkeleton />
+        ) : currentView === "dashboard" ? (
+          <div className="space-y-8 sm:space-y-10">
             {/* Friendly Context Greeting */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">
-                  {getGreeting()}, {currentUser.name.split(" ")[0]} 👋
+                <h1 className="text-xl sm:text-3xl font-bold text-zinc-900 tracking-tight">
+                  {getGreeting()},{" "}
+                  {(currentUser.name || "friend").split(" ")[0]} 👋
                 </h1>
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="text-xs sm:text-sm text-zinc-500 mt-1">
                   Here is where you left off. Ready to resume without the mental friction?
                 </p>
               </div>
 
+              {/* Desktop New Activity Button */}
               <button
                 onClick={() => setIsNewActivityModalOpen(true)}
-                className="inline-flex items-center gap-2 bg-zinc-900 text-white hover:bg-zinc-800 text-xs font-medium px-4 py-2.5 rounded-xl shadow-xs transition-all"
+                className="hidden md:inline-flex items-center gap-2 bg-zinc-900 text-white hover:bg-zinc-800 text-xs font-medium px-4 py-2.5 rounded-xl shadow-xs transition-all"
               >
                 <Plus className="w-4 h-4 text-emerald-400" />
                 <span>New Activity</span>
               </button>
             </div>
 
-            {/* 1. HERO COMPONENT: CONTINUE WHERE YOU LEFT OFF */}
-            <section aria-label="Resume Last Activity">
+            {/* ========================================================================= */}
+            {/* 1. HERO COMPONENT: CONTINUE WHERE YOU LEFT OFF (Home Tab on Mobile / Always visible on Desktop) */}
+            {/* ========================================================================= */}
+            <section
+              aria-label="Resume Last Activity"
+              className={`${mobileTab === "home" ? "block" : "hidden md:block"}`}
+            >
               <ResumeCard
                 resumeData={resumeData}
                 onOpenCheckpointModal={(id) => handleOpenCheckpointModal(id)}
@@ -230,8 +288,14 @@ export default function App() {
               />
             </section>
 
-            {/* 2. RECENT ACTIVITIES LIST */}
-            <section className="space-y-4">
+            {/* ========================================================================= */}
+            {/* 2. ALL ACTIVITIES LIST (Activities Tab on Mobile / Always visible on Desktop) */}
+            {/* ========================================================================= */}
+            <section
+              className={`space-y-4 ${
+                mobileTab === "activities" ? "block" : "hidden md:block"
+              }`}
+            >
               <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-zinc-500" />
@@ -239,7 +303,17 @@ export default function App() {
                     All Activities ({activities.length})
                   </h2>
                 </div>
-                <span className="text-xs text-zinc-500">
+                
+                {/* Mobile 'New Activity' trigger on Activities tab */}
+                <button
+                  onClick={() => setIsNewActivityModalOpen(true)}
+                  className="md:hidden inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>New</span>
+                </button>
+
+                <span className="hidden md:inline text-xs text-zinc-500">
                   Sorted by most recently active
                 </span>
               </div>
@@ -290,6 +364,14 @@ export default function App() {
         )}
       </main>
 
+      {/* Mobile Bottom Navigation Bar (md:hidden) */}
+      <MobileBottomNav
+        activeTab={mobileTab}
+        onChangeTab={handleTabChange}
+        onOpenAddCheckpoint={handleQuickAddCheckpoint}
+        hasActivities={activities.length > 0}
+      />
+
       {/* Checkpoint Drop / Edit Modal */}
       <CheckpointModal
         isOpen={isCheckpointModalOpen}
@@ -308,6 +390,24 @@ export default function App() {
         isOpen={isNewActivityModalOpen}
         onClose={() => setIsNewActivityModalOpen(false)}
         onCreate={handleCreateActivity}
+      />
+
+      {/* Quick Activity Selector Modal (Triggered by Mobile '+' button) */}
+      <ActivitySelectModal
+        isOpen={isActivitySelectModalOpen}
+        onClose={() => setIsActivitySelectModalOpen(false)}
+        activities={activities}
+        onSelectActivity={(act) => handleOpenCheckpointModal(act.id)}
+        onCreateNewActivity={() => setIsNewActivityModalOpen(true)}
+      />
+
+      {/* Profile Modal (Triggered by Mobile Bottom Nav Profile tab) */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        user={currentUser}
+        onSignOut={handleLogout}
+        activitiesCount={activities.length}
       />
     </div>
   );
