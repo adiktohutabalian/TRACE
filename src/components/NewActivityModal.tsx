@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Plus, Sparkles } from "lucide-react";
+import { X, Plus, Sparkles, Loader2 } from "lucide-react";
 
 interface NewActivityModalProps {
   isOpen: boolean;
@@ -74,12 +74,21 @@ export const NewActivityModal: React.FC<NewActivityModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl max-w-lg w-full shadow-xl border border-zinc-200 overflow-hidden">
+    <div
+      id="new-activity-modal-backdrop"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-zinc-950/40 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl max-w-lg w-full shadow-2xl border border-zinc-200 overflow-hidden max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200">
+        {/* Mobile handle indicator */}
+        <div className="w-12 h-1.5 bg-zinc-300 rounded-full mx-auto mt-3 sm:hidden" />
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/70">
           <div>
-            <h3 className="text-base font-semibold text-zinc-900">
+            <h3 className="text-base font-semibold text-zinc-900 tracking-tight">
               Create New Activity
             </h3>
             <p className="text-xs text-zinc-500">
@@ -88,14 +97,14 @@ export const NewActivityModal: React.FC<NewActivityModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-600 p-1.5 rounded-lg hover:bg-zinc-200/60 transition-colors"
+            className="text-zinc-400 hover:text-zinc-600 p-2 rounded-xl hover:bg-zinc-200/60 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Form Body - Scrollable on small screens */}
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
               {error}
@@ -211,10 +220,19 @@ export const NewActivityModal: React.FC<NewActivityModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-all shadow-xs flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? "Creating..." : "Create Activity"}</span>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-300" />
+                  <span>Creating Activity...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create Activity</span>
+                </>
+              )}
             </button>
           </div>
         </form>
