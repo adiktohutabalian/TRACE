@@ -12,11 +12,24 @@ import { MobileBottomNav, MobileTab } from "./components/MobileBottomNav";
 import { ProfileModal } from "./components/ProfileModal";
 import { ActivitySelectModal } from "./components/ActivitySelectModal";
 import { DashboardSkeleton } from "./components/SkeletonLoaders";
-import { Plus, Compass, Layers, Sparkles } from "lucide-react";
+import { ToastContainer, ToastData, ToastType } from "./components/Toast";
+import { Plus, Compass, Layers, Sparkles, AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
+
+  // Toast Notifications
+  const [toasts, setToasts] = useState<ToastData[]>([]);
+
+  const showToast = (message: string, type: ToastType = "info") => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+  };
+
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   // App Navigation View
   const [currentView, setCurrentView] = useState<"dashboard" | "activity_detail">(
@@ -33,6 +46,7 @@ export default function App() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
 
   // Modal States
   const [isCheckpointModalOpen, setIsCheckpointModalOpen] = useState(false);
@@ -69,14 +83,19 @@ export default function App() {
     if (!currentUser) return;
     try {
       setLoadingData(true);
+      setDashboardError(null);
       const [resResume, resActivities] = await Promise.all([
         api.getResume(),
         api.getActivities(),
       ]);
       setResumeData(resResume.resume);
       setActivities(resActivities.activities);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load dashboard data", err);
+      const errMsg =
+        err?.message || "Unable to reach database. Please check your connection.";
+      setDashboardError(errMsg);
+      showToast(errMsg, "error");
     } finally {
       setLoadingData(false);
     }
@@ -92,6 +111,7 @@ export default function App() {
   const handleAuthSuccess = (user: User) => {
     setCurrentUser(user);
     setCurrentView("dashboard");
+    showToast(`Welcome back, ${(user.name || "friend").split(" ")[0]}!`, "success");
   };
 
   const handleLogout = () => {
@@ -100,6 +120,7 @@ export default function App() {
     setResumeData(null);
     setActivities([]);
     setCurrentView("dashboard");
+    showToast("Signed out successfully.", "info");
   };
 
   // Checkpoint Modal Handlers
@@ -119,15 +140,23 @@ export default function App() {
   }) => {
     if (!targetActivityIdForCheckpoint) return;
 
-    if (editingCheckpoint) {
-      // Edit existing
-      await api.editCheckpoint(editingCheckpoint.id, data);
-    } else {
-      // Create new
-      await api.createCheckpoint(targetActivityIdForCheckpoint, data);
-    }
+    try {
+      if (editingCheckpoint) {
+        // Edit existing
+        await api.editCheckpoint(editingCheckpoint.id, data);
+        showToast("Checkpoint updated successfully! ✏️", "success");
+      } else {
+        // Create new
+        await api.createCheckpoint(targetActivityIdForCheckpoint, data);
+        showToast("Checkpoint dropped! Ready whenever you return. 🎯", "success");
+      }
 
-    await refreshData();
+      await refreshData();
+    } catch (err: any) {
+      const msg = err.message || "Failed to save checkpoint";
+      showToast(msg, "error");
+      throw err; // Lempar agar modal tahu terjadi error
+    }
   };
 
   // Activity Handlers
@@ -139,8 +168,15 @@ export default function App() {
     initial_important?: string;
     initial_next?: string;
   }) => {
-    await api.createActivity(data);
-    await refreshData();
+    try {
+      await api.createActivity(data);
+      showToast(`Created activity "${data.title}" 🚀`, "success");
+      await refreshData();
+    } catch (err: any) {
+      const msg = err.message || "Failed to create activity";
+      showToast(msg, "error");
+      throw err;
+    }
   };
 
   const handleDeleteActivity = async (activityId: string) => {
@@ -150,9 +186,10 @@ export default function App() {
         setCurrentView("dashboard");
         setSelectedActivityId(null);
       }
+      showToast("Activity deleted.", "info");
       await refreshData();
     } catch (err: any) {
-      alert(err.message || "Failed to delete activity");
+      showToast(err.message || "Failed to delete activity", "error");
     }
   };
 
@@ -247,7 +284,29 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
-        {loadingData && activities.length === 0 ? (
+        {dashboardError && activities.length === 0 ? (
+          <div className="py-16 px-6 text-center bg-white rounded-2xl border border-rose-200/80 shadow-xs max-w-lg mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-zinc-900">
+                Connection Issue
+              </h3>
+              <p className="text-xs text-zinc-500 max-w-xs mx-auto">
+                {dashboardError}
+              </p>
+            </div>
+            <button
+              onClick={() => refreshData()}
+              disabled={loadingData}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl shadow-xs transition-all disabled:opacity-60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingData ? "animate-spin" : ""}`} />
+              <span>{loadingData ? "Reconnecting..." : "Try Reconnecting"}</span>
+            </button>
+          </div>
+        ) : loadingData && activities.length === 0 ? (
           <DashboardSkeleton />
         ) : currentView === "dashboard" ? (
           <div className="space-y-8 sm:space-y-10">
@@ -409,6 +468,9 @@ export default function App() {
         onSignOut={handleLogout}
         activitiesCount={activities.length}
       />
+
+      {/* Floating Toast Feedback Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
