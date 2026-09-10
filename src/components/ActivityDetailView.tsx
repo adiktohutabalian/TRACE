@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Activity, Checkpoint } from "../types";
 import { api } from "../api";
 import { TimelineSkeleton } from "./SkeletonLoaders";
+import { TimelineEmptyState } from "./EmptyStates";
 import {
   ArrowLeft,
   Compass,
@@ -168,22 +169,7 @@ export const ActivityDetailView: React.FC<ActivityDetailViewProps> = ({
         </div>
 
         {checkpoints.length === 0 ? (
-          <div className="bg-white border border-dashed border-zinc-200 rounded-2xl p-8 text-center">
-            <Compass className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
-            <h3 className="text-sm font-semibold text-zinc-800">
-              No checkpoints recorded yet
-            </h3>
-            <p className="text-xs text-zinc-500 mt-1 mb-4">
-              Leave a checkpoint whenever you pause your work to resume
-              seamlessly next time.
-            </p>
-            <button
-              onClick={() => onOpenCheckpointModal(activity.id)}
-              className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-xs font-medium"
-            >
-              Drop First Checkpoint
-            </button>
-          </div>
+          <TimelineEmptyState onAction={() => onOpenCheckpointModal(activity.id)} />
         ) : (
           <div className="relative border-l-2 border-zinc-200 ml-4 space-y-6 py-2">
             {checkpoints.map((chk, index) => {
