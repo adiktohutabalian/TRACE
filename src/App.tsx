@@ -13,6 +13,7 @@ import { ProfileModal } from "./components/ProfileModal";
 import { ActivitySelectModal } from "./components/ActivitySelectModal";
 import { DashboardSkeleton } from "./components/SkeletonLoaders";
 import { ToastContainer, ToastData, ToastType } from "./components/Toast";
+import { DashboardEmptyState } from "./components/EmptyStates";
 import { Plus, Compass, Layers, Sparkles, AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function App() {
@@ -333,19 +334,21 @@ export default function App() {
             </div>
 
             {/* ========================================================================= */}
-            {/* 1. HERO COMPONENT: CONTINUE WHERE YOU LEFT OFF (Home Tab on Mobile / Always visible on Desktop) */}
+            {/* 1. HERO COMPONENT: CONTINUE WHERE YOU LEFT OFF (Shown when there is active work) */}
             {/* ========================================================================= */}
-            <section
-              aria-label="Resume Last Activity"
-              className={`${mobileTab === "home" ? "block" : "hidden md:block"}`}
-            >
-              <ResumeCard
-                resumeData={resumeData}
-                onOpenCheckpointModal={(id) => handleOpenCheckpointModal(id)}
-                onViewActivityDetail={handleViewActivityDetail}
-                onOpenCreateActivity={() => setIsNewActivityModalOpen(true)}
-              />
-            </section>
+            {activities.length > 0 && (
+              <section
+                aria-label="Resume Last Activity"
+                className={`${mobileTab === "home" ? "block" : "hidden md:block"}`}
+              >
+                <ResumeCard
+                  resumeData={resumeData}
+                  onOpenCheckpointModal={(id) => handleOpenCheckpointModal(id)}
+                  onViewActivityDetail={handleViewActivityDetail}
+                  onOpenCreateActivity={() => setIsNewActivityModalOpen(true)}
+                />
+              </section>
+            )}
 
             {/* ========================================================================= */}
             {/* 2. ALL ACTIVITIES LIST (Activities Tab on Mobile / Always visible on Desktop) */}
@@ -378,18 +381,7 @@ export default function App() {
               </div>
 
               {activities.length === 0 ? (
-                <div className="py-12 text-center bg-white border border-dashed border-zinc-200 rounded-2xl p-6">
-                  <p className="text-sm text-zinc-500 mb-3">
-                    You don't have any activities created yet.
-                  </p>
-                  <button
-                    onClick={() => setIsNewActivityModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Create an activity to get started</span>
-                  </button>
-                </div>
+                <DashboardEmptyState onAction={() => setIsNewActivityModalOpen(true)} />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {activities.map((activity) => (
