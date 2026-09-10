@@ -14,6 +14,7 @@ import { ActivitySelectModal } from "./components/ActivitySelectModal";
 import { DashboardSkeleton } from "./components/SkeletonLoaders";
 import { ToastContainer, ToastData, ToastType } from "./components/Toast";
 import { DashboardEmptyState } from "./components/EmptyStates";
+import { ShortcutsModal } from "./components/ShortcutsModal";
 import { Plus, Compass, Layers, Sparkles, AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState<MobileTab>("home");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isActivitySelectModalOpen, setIsActivitySelectModalOpen] = useState(false);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
 
   // Data States
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
@@ -107,6 +109,93 @@ export default function App() {
       refreshData();
     }
   }, [currentUser]);
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // If typing in input, textarea, or contentEditable, ignore single-key shortcuts
+      const activeEl = document.activeElement;
+      const isTyping =
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          (activeEl as HTMLElement).isContentEditable);
+
+      // Escape closes any open modal
+      if (e.key === "Escape") {
+        if (isShortcutsModalOpen) {
+          setIsShortcutsModalOpen(false);
+          return;
+        }
+        if (isCheckpointModalOpen) {
+          setIsCheckpointModalOpen(false);
+          return;
+        }
+        if (isNewActivityModalOpen) {
+          setIsNewActivityModalOpen(false);
+          return;
+        }
+        if (isActivitySelectModalOpen) {
+          setIsActivitySelectModalOpen(false);
+          return;
+        }
+        if (isProfileModalOpen) {
+          setIsProfileModalOpen(false);
+          return;
+        }
+      }
+
+      if (isTyping) return;
+
+      // '?' opens shortcuts modal
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setIsShortcutsModalOpen((prev) => !prev);
+        return;
+      }
+
+      // 'c' or 'C' drops checkpoint
+      if (e.key === "c" || e.key === "C") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        e.preventDefault();
+        if (selectedActivityId) {
+          handleOpenCheckpointModal(selectedActivityId);
+        } else if (resumeData?.activity) {
+          handleOpenCheckpointModal(resumeData.activity.id);
+        } else if (activities.length === 1) {
+          handleOpenCheckpointModal(activities[0].id);
+        } else if (activities.length > 1) {
+          setIsActivitySelectModalOpen(true);
+        } else {
+          setIsNewActivityModalOpen(true);
+        }
+        return;
+      }
+
+      // 'n' or 'N' opens new activity modal
+      if (e.key === "n" || e.key === "N") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        e.preventDefault();
+        setIsNewActivityModalOpen(true);
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    currentUser,
+    isShortcutsModalOpen,
+    isCheckpointModalOpen,
+    isNewActivityModalOpen,
+    isActivitySelectModalOpen,
+    isProfileModalOpen,
+    selectedActivityId,
+    resumeData,
+    activities,
+  ]);
 
   // Auth Handlers
   const handleAuthSuccess = (user: User) => {
@@ -281,6 +370,7 @@ export default function App() {
           setSelectedActivityId(null);
           setMobileTab("home");
         }}
+        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -459,6 +549,12 @@ export default function App() {
         user={currentUser}
         onSignOut={handleLogout}
         activitiesCount={activities.length}
+      />
+
+      {/* Keyboard Shortcuts Dialog */}
+      <ShortcutsModal
+        isOpen={isShortcutsModalOpen}
+        onClose={() => setIsShortcutsModalOpen(false)}
       />
 
       {/* Floating Toast Feedback Notifications */}
