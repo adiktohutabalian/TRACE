@@ -7,6 +7,7 @@ interface NavbarProps {
   onLogout: () => void;
   onNavigateHome: () => void;
   onOpenShortcuts?: () => void;
+  onOpenProfile?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -14,19 +15,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   onNavigateHome,
   onOpenShortcuts,
+  onOpenProfile,
 }) => {
   return (
     <header className="border-b border-zinc-200 bg-white sticky top-0 z-30">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-15 sm:h-16 flex items-center justify-between">
         {/* Brand */}
         <button
           onClick={onNavigateHome}
-          className="flex items-center gap-3 text-left group focus:outline-none cursor-pointer"
+          className="flex items-center gap-2.5 sm:gap-3 text-left group focus:outline-none cursor-pointer"
         >
           <img
             src="/logo/trace.png"
             alt="TRACE Logo"
-            className="w-9 h-9 rounded-xl object-contain shadow-xs group-hover:scale-105 transition-transform"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-contain shadow-xs group-hover:scale-105 transition-transform"
             onError={(e) => {
               e.currentTarget.style.display = "none";
               const fallback = document.getElementById("nav-logo-fallback");
@@ -36,17 +38,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div
             id="nav-logo-fallback"
             style={{ display: "none" }}
-            className="w-9 h-9 rounded-xl bg-zinc-900 text-white items-center justify-center font-bold tracking-wider shadow-sm group-hover:bg-zinc-800 transition-colors"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-zinc-900 text-white items-center justify-center font-bold tracking-wider shadow-sm group-hover:bg-zinc-800 transition-colors"
           >
-            <BookmarkCheck className="w-5 h-5 text-emerald-400" />
+            <BookmarkCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-zinc-900 text-lg tracking-wider">
+              <span className="font-extrabold text-zinc-900 text-base sm:text-lg tracking-wider">
                 TRACE
               </span>
             </div>
-            <p className="text-[11px] text-zinc-500 hidden sm:block tracking-tight">
+            <p className="text-[11px] text-zinc-500 hidden sm:block tracking-tight leading-none">
               Find your way back.
             </p>
           </div>
@@ -58,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenShortcuts}
               title="Keyboard Shortcuts (?)"
-              className="p-2 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Command className="w-4 h-4 text-zinc-600" />
               <span className="hidden sm:inline font-medium">Shortcuts</span>
@@ -68,6 +70,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
+          {/* Mobile Profile Trigger Avatar (visible on mobile) */}
+          {onOpenProfile && (
+            <button
+              onClick={onOpenProfile}
+              className="md:hidden w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-bold border border-emerald-200 cursor-pointer"
+              title="Open Profile"
+            >
+              {(user.name || user.name || user.email).charAt(0).toUpperCase()}
+            </button>
+          )}
+
+          {/* Desktop Profile Pill */}
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-xs font-medium text-zinc-700">
             <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">
               {(user.name || user.name || user.email).charAt(0).toUpperCase()}

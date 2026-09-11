@@ -49,7 +49,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
   const checkpoint = activity.latest_checkpoint;
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-xl p-5 hover:border-zinc-300 transition-all shadow-2xs flex flex-col justify-between group">
+    <div className="bg-white border border-zinc-200 rounded-xl p-5 hover:border-zinc-300 transition-all shadow-2xs flex flex-col justify-between h-full group">
       <div>
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-2.5">
@@ -134,34 +134,42 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
         )}
       </div>
 
-      {/* Footer controls: Quick Action & Details */}
-      <div className="pt-3 border-t border-zinc-100 flex items-center justify-between mt-2">
-        <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
-          <Clock className="w-3 h-3" />
-          <span>
-            {checkpoint
-              ? `Updated ${formatRelativeTime(checkpoint.created_at)}`
-              : "New"}
+      {/* Footer controls: Meta info & Action buttons (Always aligned & never wraps awkwardly) */}
+      <div className="pt-3 border-t border-zinc-100 mt-auto space-y-2.5">
+        {/* Meta row: Relative time and checkpoints counter */}
+        <div className="flex items-center justify-between text-[11px] text-zinc-400">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+            <span>
+              {checkpoint
+                ? `Updated ${formatRelativeTime(checkpoint.created_at)}`
+                : "New activity"}
+            </span>
+          </div>
+          <span className="font-medium text-zinc-500 whitespace-nowrap bg-zinc-50 px-2 py-0.5 rounded-md border border-zinc-100">
+            {activity.checkpoint_count || 0}{" "}
+            {activity.checkpoint_count === 1 ? "checkpoint" : "checkpoints"}
           </span>
-          <span className="text-zinc-300">•</span>
-          <span>{activity.checkpoint_count || 0} checkpoints</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        {/* Action buttons row: 50/50 Grid - Perfectly aligned across all cards */}
+        <div className="grid grid-cols-2 gap-2 pt-0.5">
           <button
+            type="button"
             onClick={() => onOpenCheckpointModal(activity.id)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-md transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 rounded-lg transition-colors cursor-pointer"
           >
-            <Plus className="w-3 h-3 text-zinc-600" />
+            <Plus className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
             <span>Checkpoint</span>
           </button>
 
           <button
+            type="button"
             onClick={() => onViewActivityDetail(activity.id)}
-            className="inline-flex items-center gap-0.5 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
+            className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 text-xs font-medium text-zinc-700 bg-white hover:bg-zinc-50 hover:text-zinc-950 border border-zinc-200/80 active:bg-zinc-100 rounded-lg transition-colors cursor-pointer group/btn"
           >
             <span>Timeline</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3.5 h-3.5 text-zinc-400 group-hover/btn:text-zinc-900 group-hover/btn:translate-x-0.5 transition-all shrink-0" />
           </button>
         </div>
       </div>
