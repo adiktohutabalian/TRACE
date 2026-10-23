@@ -1,5 +1,5 @@
 import type { VercelRequest } from "@vercel/node";
-import { DBService, DBUser } from "./db";
+import { DBService, DBUser } from "./db.js";
 
 /**
  * Extract the authenticated user from the Authorization header.

@@ -35,9 +35,20 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers,
   });
 
-  const data = await res.json();
+  const text = await res.text();
+  let data: any;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(
+      res.ok
+        ? "Invalid server response"
+        : `Server Error (${res.status}): ${text.replace(/\s+/g, " ").trim().slice(0, 150)}`
+    );
+  }
+
   if (!res.ok) {
-    throw new Error(data.error || "An unexpected error occurred");
+    throw new Error(data?.error || `Server error (${res.status})`);
   }
 
   return data as T;

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { DBService } from "../_utils/db";
-import type { DBUser } from "../_utils/db";
+import { DBService } from "../_utils/db.js";
+import type { DBUser } from "../_utils/db.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers

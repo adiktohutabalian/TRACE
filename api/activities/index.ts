@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getAuthenticatedUser } from "../_utils/auth";
-import { DBService } from "../_utils/db";
-import type { DBActivity, DBCheckpoint } from "../_utils/db";
+import { getAuthenticatedUser } from "../_utils/auth.js";
+import { DBService } from "../_utils/db.js";
+import type { DBActivity, DBCheckpoint } from "../_utils/db.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");

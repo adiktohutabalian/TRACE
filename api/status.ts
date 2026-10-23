@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isSupabaseConfigured } from "./_utils/supabase";
+import { isSupabaseConfigured } from "./_utils/supabase.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   res.json({

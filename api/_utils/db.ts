@@ -1,4 +1,4 @@
-import { getSupabase } from "./supabase";
+import { getSupabase } from "./supabase.js";
 
 export interface DBUser {
   id: string;
