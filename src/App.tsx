@@ -8,6 +8,7 @@ import { CheckpointModal } from "./components/CheckpointModal";
 import { NewActivityModal } from "./components/NewActivityModal";
 import { ActivityDetailView } from "./components/ActivityDetailView";
 import { AuthView } from "./components/AuthView";
+import { LandingPage } from "./components/LandingPage";
 import { MobileBottomNav, MobileTab } from "./components/MobileBottomNav";
 import { ProfileModal } from "./components/ProfileModal";
 import { ActivitySelectModal } from "./components/ActivitySelectModal";
@@ -20,6 +21,8 @@ import { Plus, Compass, Layers, Sparkles, AlertTriangle, RefreshCw } from "lucid
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [unauthView, setUnauthView] = useState<"landing" | "auth">("landing");
+  const [authInitialMode, setAuthInitialMode] = useState<"login" | "register">("login");
 
   // Toast Notifications
   const [toasts, setToasts] = useState<ToastData[]>([]);
@@ -210,7 +213,22 @@ export default function App() {
     setResumeData(null);
     setActivities([]);
     setCurrentView("dashboard");
+    setUnauthView("landing");
     showToast("Signed out successfully.", "info");
+  };
+
+    const handleGuestDemoLogin = async () => {
+    try {
+      try {
+        const res = await api.login("demo@trace.dev", "demo1234");
+        handleAuthSuccess(res.user);
+      } catch {
+        const res = await api.register("Demo Developer", "demo@trace.dev", "demo1234");
+        handleAuthSuccess(res.user);
+      }
+    } catch (err: any) {
+      showToast("Demo initialization error: " + (err.message || "Failed to start demo"), "error");
+    }
   };
 
   // Checkpoint Modal Handlers
@@ -302,7 +320,38 @@ export default function App() {
 
   // If not logged in, render the clean Auth screen
   if (!currentUser) {
-    return <AuthView onAuthSuccess={handleAuthSuccess} />;
+    // If not logged in, render the Landing (Introduction) page or the Auth screen
+  if (!currentUser) {
+    if (unauthView === "auth") {
+      return (
+        <>
+          <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+          <AuthView
+            initialMode={authInitialMode}
+            onAuthSuccess={handleAuthSuccess}
+            onBackToLanding={() => setUnauthView("landing")}
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+        <LandingPage
+          onOpenLogin={() => {
+            setAuthInitialMode("login");
+            setUnauthView("auth");
+          }}
+          onOpenRegister={() => {
+            setAuthInitialMode("register");
+            setUnauthView("auth");
+          }}
+          onTryGuestDemo={handleGuestDemoLogin}
+        />
+      </>
+    );
+  }
   }
 
   // Get active activity object for the checkpoint modal
