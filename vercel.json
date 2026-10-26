@@ -3,7 +3,25 @@
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/activities/:id/checkpoints",
+      "destination": "/api/activities/checkpoints?id=:id"
+    },
+    {
+      "source": "/api/activities/:id",
+      "destination": "/api/activities/detail?id=:id"
+    },
+    {
+      "source": "/api/checkpoints/:id",
+      "destination": "/api/checkpoints/detail?id=:id"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

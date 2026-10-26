@@ -61,6 +61,7 @@ export default function App() {
   const [editingCheckpoint, setEditingCheckpoint] = useState<Checkpoint | null>(null);
 
   const [isNewActivityModalOpen, setIsNewActivityModalOpen] = useState(false);
+  const [timelineVersion, setTimelineVersion] = useState(0);
 
   // 1. Initial Authentication Check
   useEffect(() => {
@@ -259,6 +260,7 @@ export default function App() {
         showToast("Checkpoint dropped! Ready whenever you return. 🎯", "success");
       }
 
+      setTimelineVersion((v) => v + 1);
       await refreshData();
     } catch (err: any) {
       const msg = err.message || "Failed to save checkpoint";
@@ -540,6 +542,7 @@ export default function App() {
           /* Activity Detail View (History Timeline) */
           selectedActivityId && (
             <ActivityDetailView
+              key={`${selectedActivityId}-${timelineVersion}`}
               activityId={selectedActivityId}
               onBack={() => {
                 setCurrentView("dashboard");
